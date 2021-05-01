@@ -169,20 +169,14 @@ void MLFQ(Feature details){
             printf("\nTurnaround time: %d", TT);
             printf("\n************************************");
             flag[lcAT][1] = DONE;
+            AWT = AWT + WT;
         }
         // preemp not done
         else if(details.process[0][lcAT][2] > details.queue[cQ][2] && flag[lcAT][1] > DONE){
             int temp2 = lcAT;
             flag[lcAT][0] = 1;
             nProcess++;
-            // iterate CPU Time
-            for(int v=0; v<details.process[0][lcAT][2]; v++){
-                cCPUT++;
-                // printf("\nCPU: %d\n", cCPUT);
-                if(cCPUT % PB == 0){
-                    keyPB = 1;
-                }
-            }
+            
             
 
             if(ST < details.process[0][lcAT][1]){
@@ -208,7 +202,7 @@ void MLFQ(Feature details){
                     
                     if(tempST % details.process[0][lcAT][4] == 0){
                         keyIO = 1;
-                        printf("\n tempST: %d\n", tempST);
+                        // printf("\n tempST: %d\n", tempST);
                         // break;
                     }
                 }
@@ -217,15 +211,32 @@ void MLFQ(Feature details){
 
             if(keyIO == 0){
                 ET = ET + details.queue[cQ][2];
+                // iterate CPU Time
+                for(int v=0; v<details.process[0][lcAT][2]; v++){
+                    cCPUT++;
+                    // printf("\nCPU: %d\n", cCPUT);
+                    if(cCPUT % PB == 0){
+                        keyPB = 1;
+                        // printf("\n PB @ %d", cCPUT);
+                    }
+                }
             }
             else{
-                ET = ET + details.process[0][lcAT][3];
+                for(int v=0; v<details.process[0][lcAT][3]; v++){
+                    cCPUT++;
+                    // printf("\nCPU: %d\n", cCPUT);
+                    if(cCPUT % PB == 0){
+                        keyPB = 1;
+                        // printf("\n PB @ %d", cCPUT);
+                    }
+                }
+                ET = ET + details.process[0][lcAT][4];
                 tempST = ET;
                 tempET = tempST + details.process[0][lcAT][3];
                 details.process[2][i][0] = details.process[0][lcAT][0]; // for printint pID
                 details.process[2][i][2] = tempST; // for printing start time
                 details.process[2][i][3] = tempET; // for printing end time
-                printf("\nIO Start time: %d End time: %d", tempST, tempET);
+                // printf("\nIO Start time: %d End time: %d", tempST, tempET);
             }
     
             details.process[1][i][0] = details.process[0][lcAT][0]; // for printing pID
@@ -311,25 +322,28 @@ void MLFQ(Feature details){
 
             /* -------- DO THIS NEXT
                 When PB = 1, put all PRQ[X][X] into highest priority and reset remaining PRQ to 0
-                // look for highest queue priority
-                for(int i=0; i<details.input[0]; i++){
-                    int temp = details.queue[i][1];
-                    if(temp < QP && temp > DONE){
-                        QP = details.queue[i][1];
-                        lQP = details.queue[i][0];
-                        ilQP = i;
-                    }
-                }
-                for(int i=0; i<nProcess; i++){
-                    for(int j=0; j<details.input[0]; j++){
-                        PRQ[i][j] = 0; // other queues marked to 0
-                        PRQ[i][ilQP] = 1; // highest priority to be used
+            */
+            
+           // look for highest queue priority
+           if(keyPB == 1){
+            //    for(int try=0; try<details.input[0]; try++){
+            //         printf("\n bPRQ: %d", PRQ[lcAT][try]);
+            //     }
+                for(int k=0; k<nProcess; k++){
+                    for(int l=0; l<details.input[0]; l++){
+                        PRQ[k][l] = 0; // other queues marked to 0
+                        PRQ[k][ilQP] = 1; // highest priority to be used
                     }
                 }
                 for(int row=0; row<details.input[1]; row++){
                     details.process[0][row][5] = ilQP;
                 }
-            */
+                keyPB = 0;
+                // for(int try=0; try<details.input[0]; try++){
+                //     printf("\n aPRQ: %d", PRQ[lcAT][try]);
+                // }
+           }
+            
 
 
             // // look for next queue
@@ -368,14 +382,7 @@ void MLFQ(Feature details){
         }
         // print preemp not done but remaining burst time is <= queue QT
         else if(flag[lcAT][0] == 1 && details.process[0][lcAT][2] <= details.queue[cQ][2]){
-            // iterate CPU Time
-            for(int v=0; v<details.process[0][lcAT][2]; v++){
-                cCPUT++;
-                // printf("\nCPU: %d\n", cCPUT);
-                if(cCPUT % PB == 0){
-                    keyPB = 1;
-                }
-            }
+            
             if(ST < details.process[0][lcAT][1]){
                 ST = details.process[0][lcAT][1];
                 ET = ST;
@@ -395,7 +402,7 @@ void MLFQ(Feature details){
                     // printf("\nCPU: %d\n", cCPUT);
                     if(tempST % details.process[0][lcAT][4] == 0){
                         keyIO = 1;
-                        break;
+                        // break;
                     }
                 }
                 
@@ -403,15 +410,31 @@ void MLFQ(Feature details){
 
             if(keyIO == 0){
                 ET = ET + details.queue[cQ][2];
+                for(int v=0; v<details.process[0][lcAT][2]; v++){
+                    cCPUT++;
+                    // printf("\nCPU: %d\n", cCPUT);
+                    if(cCPUT % PB == 0){
+                        keyPB = 1;
+                        // printf("\n PB @ %d", cCPUT);
+                    }
+                }
             }
             else{
-                ET = ET + details.process[0][lcAT][3];
+                for(int v=0; v<details.process[0][lcAT][3]; v++){
+                    cCPUT++;
+                    // printf("\nCPU: %d\n", cCPUT);
+                    if(cCPUT % PB == 0){
+                        keyPB = 1;
+                        // printf("\n PB @ %d", cCPUT);
+                    }
+                }
+                ET = ET + details.process[0][lcAT][4];
                 tempST = ET;
                 tempET = tempST + details.process[0][lcAT][3];
                 details.process[2][i][0] = details.process[0][lcAT][0]; // for printint pID
                 details.process[2][i][2] = tempST; // for printing start time
                 details.process[2][i][3] = tempET; // for printing end time
-                printf("\nIO Start time: %d End time: %d", tempST, tempET);
+                // printf("\nIO Start time: %d End time: %d", tempST, tempET);
             }
 
             // ET = ET + details.process[0][lcAT][2];
@@ -435,12 +458,12 @@ void MLFQ(Feature details){
             TT = ET - flag[lcAT][1];
             WT = TT - details.process[0][lcAT][2];
             key = 1;
-            
+            AWT = AWT + WT;
             // printf("\nRBT: %d lcAT: %d pID: %d", details.process[0][lcAT][2], lcAT, details.process[0][lcAT][0]);
         }
-        else{
-            printf("\nwaz wrong? RBT: %d i: %d nProcess: %d lcAT: %d", details.process[0][lcAT][2], i, nProcess, lcAT);
-        }
+        // else{
+        //     printf("\nwaz wrong? RBT: %d i: %d nProcess: %d lcAT: %d", details.process[0][lcAT][2], i, nProcess, lcAT);
+        // }
         // print preemp done
         if(flag[lcAT][0] == 1 && key == 1){
             if(ST < details.process[0][lcAT][1]){
@@ -464,6 +487,7 @@ void MLFQ(Feature details){
             printf("\n************************************");
             flag[lcAT][1] = DONE;
             key = 0;
+            AWT = AWT + WT;
         }
     }
 
