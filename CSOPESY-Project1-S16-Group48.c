@@ -541,6 +541,16 @@ int main(){
     GetInputs(fp,&details);
     fclose(fp);
 
+    if(details.input[0] < 2 || details.input[0] > 5){
+        printf("Input invalid");
+        exit(1);
+    }
+
+    if(details.input[1] < 3 || details.input[1] > 100){
+        printf("Input invalid");
+        exit(1);
+    }
+
     MLFQ(details);
     
     return 0;
