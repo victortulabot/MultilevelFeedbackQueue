@@ -19,7 +19,7 @@ typedef char String3[4];
 typedef struct{
     int input[3];
     int queue[5][3];
-    int process[3][100][7]; 
+    int process[3][100][6]; 
     // [0][X][X] Actual details of process
     // [0][X][6] current queue in
     // [1][X][0] process ID
@@ -117,7 +117,6 @@ void MLFQ(Feature details){
     }
     for(int row=0; row<details.input[1]; row++){
         details.process[0][row][5] = ilQP;
-        details.process[0][row][6] = 0;
     }
     int key = 0;
     int keyPB = 0;
@@ -157,7 +156,7 @@ void MLFQ(Feature details){
                 cQ = k;
             }
         }
-        // printf("\n running process %d",details.process[0][lcAT][0]);
+        printf("\n running process %d",details.process[0][lcAT][0]);
         // check burst time
         if(flag[lcAT][0] == 0 && details.process[0][lcAT][2] <= details.queue[cQ][2] && details.process[0][lcAT][2] >= 0){
             // iterate CPU Time
@@ -276,139 +275,103 @@ void MLFQ(Feature details){
             if(keyIO == 0){
                 details.process[0][lcAT][2] = details.process[0][lcAT][2] - details.queue[cQ][2];
             }
-            else if(details.process[0][lcAT][6] == 0){
+            else if(counter == 0){
                 details.process[0][lcAT][2] = details.process[0][lcAT][2] - details.process[0][lcAT][3];
-                details.process[0][lcAT][6] = details.process[0][lcAT][6] + details.process[0][lcAT][3];
-
-                // dito mo icheck kung may kasunod pa or wala
-                int holder = lcAT;
-                // look for the process in the same queue
+                counter = counter + details.process[0][lcAT][3];
+                
+                // look for next arrival time at same prio queue
+                // check arrival time
+                int aAT = 0;
+                int templcAT = lcAT; 
                 for(int j=0; j<details.input[1]; j++){
-                    if(PRQ[j][cQ] == 1 && j != lcAT && flag[j][1] > flag[holder][1]){
-                        holder = j;
-                        printf("\n holder is process %d", details.process[0][holder][0]);
+                    if(flag[j][1] > aAT){
+                        aAT = flag[j][1];
                     }
                 }
-                if(holder == lcAT){
-                    printf("\n no holder");
-                }
-                // look for the highest arrival time in the same prio queue
-                // for(int j=0; j<nProcess; j++){
-                //     if(flag[j][1] >= flag[temp2][1] && flag[j][1] <= ET){
-                //         temp2 = j;
+                // if(flag[templcAT][1] <= DONE || templcAT >= details.input[1]){
+                //     templcAT = 0;
+                //     while(flag[templcAT][1] <= DONE || templcAT >= details.input[1]){
+                //         // lcAT = (int)rand() % (int)details.input[1];
+                //         templcAT++;
+                //     }
+                //     int tempcAT = flag[templcAT][1]; // arrival time
+                //     for(int j=0; j<details.input[1]; j++){
+                //         int atemp = flag[j][1]; // changing arrival time
+                //         if(atemp < tempcAT && atemp > DONE){
+                //             tempcAT = atemp;
+                //             templcAT = j;
+                //             printf("\n atemp: %d", tempcAT);
+                //         }
                 //     }
                 // }
-
-                // kung may kasunod, gawin mo to tapos process mo
-                if(holder != lcAT){
-                    for(int q=0; q<details.input[1]; q++){
-                        printf("\n before flag[%d][1]: %d", q, flag[q][1]);
-                    }printf("\n");
-                    // change arrival time in the same queue
-                    flag[lcAT][1] = flag[holder][1] + 1; // tama na to
-                    for(int q=0; q<details.input[1]; q++){
-                        printf("\n after flag[%d][1]: %d", q, flag[q][1]);
-                    }printf("\n");
-                }
-                
-
-                // kung walang kasunod, gawin mo to
-                else if(holder == lcAT){
-                    // look for next arrival time at same prio queue
-                    // check arrival time
-                    int aAT = 0;
-                    int templcAT = lcAT; 
+                // else{
+                    int tempcAT = aAT; // arrival time
                     for(int j=0; j<details.input[1]; j++){
-                        if(flag[j][1] > aAT){
-                            aAT = flag[j][1];
+                        int atemp = flag[j][1]; // changing arrival time
+                        if(atemp < tempcAT && atemp > DONE && j != lcAT){
+                            tempcAT = atemp;
+                            templcAT = j;
                         }
                     }
-                    // if(flag[templcAT][1] <= DONE || templcAT >= details.input[1]){
-                    //     templcAT = 0;
-                    //     while(flag[templcAT][1] <= DONE || templcAT >= details.input[1]){
-                    //         // lcAT = (int)rand() % (int)details.input[1];
-                    //         templcAT++;
-                    //     }
-                    //     int tempcAT = flag[templcAT][1]; // arrival time
-                    //     for(int j=0; j<details.input[1]; j++){
-                    //         int atemp = flag[j][1]; // changing arrival time
-                    //         if(atemp < tempcAT && atemp > DONE){
-                    //             tempcAT = atemp;
-                    //             templcAT = j;
-                    //             printf("\n atemp: %d", tempcAT);
-                    //         }
-                    //     }
-                    // }
-                    // else{
-                        int tempcAT = aAT; // arrival time
-                        for(int j=0; j<details.input[1]; j++){
-                            int atemp = flag[j][1]; // changing arrival time
-                            if(atemp < tempcAT && atemp > DONE && j != lcAT){
-                                tempcAT = atemp;
-                                templcAT = j;
-                            }
-                        }
-                    // }
-                    int tempcQ = cQ;
-                    // look for current prio queue
-                    // look for the marked 1 in PRQ[lcAT][X]
-                    for(int k=0; k<details.input[0]; k++){
-                        if(PRQ[templcAT][k] == 1){
-                            tempcQ = k;
-                        }
+                // }
+                int tempcQ = cQ;
+                // look for current prio queue
+                // look for the marked 1 in PRQ[lcAT][X]
+                for(int k=0; k<details.input[0]; k++){
+                    if(PRQ[templcAT][k] == 1){
+                        tempcQ = k;
                     }
-
-                    // execute process = IO burst
-                    nProcess++;
-                    i++;
-                    details.process[1][i][0] = details.process[0][templcAT][0]; // for printing pID
-                    details.process[1][i][1] = details.queue[tempcQ][0]; // for printing qID
-                    details.process[1][i][2] = tempST; // for printing start time
-                    details.process[1][i][3] = tempET; // for printing end time
-                    details.process[0][templcAT][2] = details.process[0][templcAT][2] - details.process[0][lcAT][3];
-                    printf("\n\n the IO process during process %d is pID[%d] Q[%d] ST %d ET %d",details.process[0][lcAT][0],details.process[0][templcAT][0],details.queue[tempcQ][0],tempST,tempET);
-
-                    // change arrival time of executed process to the last of same prio queue
-                    int tempncAT = details.process[0][templcAT][1]; // original arrival time of the current process
-                    int temp3 = templcAT;
-                    // look for next arrival time and check if within process time
-                    // get highest arrival timee
-                    for(int j=0; j<nProcess; j++){
-                        if(flag[j][1] > flag[temp3][1]){ // changing arrival time of the current process
-                            temp3 = j;
-                        }
-                    }
-                    // get lowest arrival time but higher than current
-                    for(int j=0; j<nProcess; j++){
-                        if(flag[j][1] < flag[temp3][1] && flag[j][1] > tempncAT && flag[j][1] > DONE){ // check this must be > DONE
-                            temp3 = j;
-                        }
-                    }
-                    int tempnewcAT = flag[temp3][1] - 1;
-                    // if within the process, do nothing
-                    if(flag[temp3][1] >= ST && flag[temp3][1] <= ET && flag[temp3][1] <= tempnewcAT){ // check ST and ET
-                        ;
-                    }
-                    else{
-                        // look for highest arrival time
-                        for(int j=0; j<nProcess; j++){
-                            if(flag[j][1] >= flag[temp3][1] && flag[j][1] <= ET){ // check ET
-                                temp3 = j;
-                            }
-                        }
-                    }
-                    // change arrival time for queue
-                    flag[templcAT][1] = flag[temp3][1] + 1;
-                    ST = tempST;
-                    ET = tempET;
                 }
-                
+
+                // execute process = IO burst
+                nProcess++;
+                i++;
+                details.process[1][i][0] = details.process[0][templcAT][0]; // for printing pID
+                details.process[1][i][1] = details.queue[tempcQ][0]; // for printing qID
+                details.process[1][i][2] = tempST; // for printing start time
+                details.process[1][i][3] = tempET; // for printing end time
+                details.process[0][templcAT][2] = details.process[0][templcAT][2] - details.process[0][lcAT][3];
+                printf("\n\n the IO process during process %d is pID[%d] Q[%d] ST %d ET %d",details.process[0][lcAT][0],details.process[0][templcAT][0],details.queue[tempcQ][0],tempST,tempET);
+
+                // change arrival time of executed process to the last of same prio queue
+                int tempncAT = details.process[0][templcAT][1]; // original arrival time of the current process
+                int temp3 = templcAT;
+                // look for next arrival time and check if within process time
+                // get highest arrival timee
+                for(int j=0; j<nProcess; j++){
+                    if(flag[j][1] > flag[temp3][1]){ // changing arrival time of the current process
+                        temp3 = j;
+                    }
+                }
+                // get lowest arrival time but higher than current
+                for(int j=0; j<nProcess; j++){
+                    if(flag[j][1] < flag[temp3][1] && flag[j][1] > tempncAT && flag[j][1] > DONE){ // check this must be > DONE
+                        temp3 = j;
+                    }
+                }
+                int tempnewcAT = flag[temp3][1] - 1;
+                // if within the process, do nothing
+                if(flag[temp3][1] >= ST && flag[temp3][1] <= ET && flag[temp3][1] <= tempnewcAT){ // check ST and ET
+                    ;
+                }
+                else{
+                    // look for highest arrival time
+                    for(int j=0; j<nProcess; j++){
+                        if(flag[j][1] >= flag[temp3][1] && flag[j][1] <= ET){ // check ET
+                            temp3 = j;
+                        }
+                    }
+                }
+                // change arrival time for queue
+                flag[templcAT][1] = flag[temp3][1] + 1;
+                ST = tempST;
+                ET = tempET;
             }
             else{
                 details.process[0][lcAT][2] = details.process[0][lcAT][2] - details.process[0][lcAT][3];
-                details.process[0][lcAT][6] = details.process[0][lcAT][6] + details.process[0][lcAT][3];
+                counter = counter + details.process[0][lcAT][3];
             }
-            // printf("\nreamining time of current process %d",details.process[0][lcAT][2]);
+            printf("\nreamining time of current process %d",details.process[0][lcAT][2]);
 
 
             int ncAT = details.process[0][lcAT][1]; // original arrival time of the current process
@@ -438,19 +401,8 @@ void MLFQ(Feature details){
                     }
                 }
             }
-            // for(int q=0; q<details.input[1]; q++){
-            //     printf("\n flag[%d][1]: %d", q, flag[q][1]);
-            // }printf("\n");
-            // for(int q=0; q<details.input[1]; q++){
-            //     // for(int k=0; k<details.input[0]; k++){
-            //         printf("\n PRQ[%d][%d]: %d", q, cQ, flag[q][cQ]);
-            //     // }
-            // }printf("\n");
-            // for(int q=0; q<details.input[1]; q++){
-            //     printf("\n details.process[0][%d][5]: %d",q, details.process[0][q][5]);
-            // }
             // change arrival time for queue                                        check
-            if (keyIO == 1 && details.process[0][lcAT][6] < details.queue[cQ][2] && details.process[0][lcAT][6] > 0){
+            if (keyIO == 1 && counter < details.queue[cQ][2] && counter > 0){
                 // counter < queue burst
                 nProcess++;
                 i++;
@@ -458,9 +410,10 @@ void MLFQ(Feature details){
             else{
                 flag[lcAT][1] = flag[temp2][1] + 1;
                 PRQ[lcAT][cQ] = DONE;
-                // counter = 0;
-                details.process[0][lcAT][6] = 0;
+                counter = 0;
             //}
+            
+            // printf("\nRBT: %d i: %d nProcess: %d lcAT: %d, pID: %d", details.process[0][lcAT][2], i, nProcess, lcAT, details.process[0][lcAT][0]);
 
             /*
                 MAYBE CHANGE INTO THIS ONE?
@@ -474,76 +427,115 @@ void MLFQ(Feature details){
                 current CPU time (cCPUT) has a loop to iterate by 1 for every burst time and check for priority boost
                 priority boost happens when ( cCPUT % PT == 0)
             */
-                // int keyQ = 0;
-                QP = details.queue[cQ][1];
-                int nextcQ = ilQP+1;
-                int keyDONE = 0;
-                // look for equal priority queue
-                for(int k=0; k<details.input[0]; k++){
-                    int temp = details.queue[k][1];
-                    if(temp == QP && PRQ[lcAT][k] > DONE){ 
-                        PRQ[lcAT][k] = 1;
-                        nextcQ = k;
-                        break;
-                    }
-                    else if(PRQ[lcAT][k] == DONE){
-                        keyDONE = 1;
-                    }
-                    
+            // int keyQ = 0;
+            QP = details.queue[cQ][1];
+            int nextcQ = ilQP+1;
+            int keyDONE = 0;
+            // look for equal priority queue
+            for(int k=0; k<details.input[0]; k++){
+                int temp = details.queue[k][1];
+                if(temp == QP && PRQ[lcAT][k] > DONE){ 
+                    PRQ[lcAT][k] = 1;
+                    nextcQ = k;
+                    break;
+                }
+                else if(PRQ[lcAT][k] == DONE){
+                    keyDONE = 1;
                 }
                 
-                // look for next priority queue
-                int temp1 = QP+1;
-                for(int k=0; k<details.input[0]; k++){
-                    int temp = details.queue[k][1];
-                    
-                    if(temp == temp1 && PRQ[lcAT][k] > DONE){
-                        PRQ[lcAT][k] = 1;
-                        nextcQ = k;
-                        keyDONE = 0;
-                        break;
-                    }
-                    else if(PRQ[lcAT][k] == DONE){
-                        keyDONE = 1;
-                    }
-                    // temp1++;
-                }
-
-                // if(keyDONE == 1){
-                //     for(int i=0; i<details.input[1]; i++){
-                //         for(int j=0; j<details.input[0]; j++){
-                //             if(PRQ[i][j] <= DONE){
-                //                 ;
-                //             }
-                //             else{
-                //                 PRQ[i][nextcQ] = 1; // highest priority to be used
-                //             }
-                //         }
-                //     }
-                //     for(int row=0; row<details.input[1]; row++){
-                //         details.process[0][row][5] = nextcQ;
-                //     }
-                //     keyDONE = 0;
-                // }
-
-                /* -------- DO THIS NEXT
-                    When PB = 1, put all PRQ[X][X] into highest priority and reset remaining PRQ to 0
-                */
-                
-            // look for highest queue priority
-            if(keyPB == 1){
-                    for(int k=0; k<details.input[1]; k++){
-                        for(int l=0; l<details.input[0]; l++){
-                                PRQ[k][l] = 0; // other queues marked to 0
-                                PRQ[k][ilQP] = 1; // highest priority to be used
-                        }
-                    }
-                    for(int row=0; row<details.input[1]; row++){
-                        details.process[0][row][5] = ilQP;
-                    }
-                    keyPB = 0;
             }
-           }
+            
+            // look for next priority queue
+            int temp1 = QP+1;
+            for(int k=0; k<details.input[0]; k++){
+                int temp = details.queue[k][1];
+                
+                if(temp == temp1 && PRQ[lcAT][k] > DONE){
+                    PRQ[lcAT][k] = 1;
+                    nextcQ = k;
+                    keyDONE = 0;
+                    break;
+                }
+                else if(PRQ[lcAT][k] == DONE){
+                    keyDONE = 1;
+                }
+                // temp1++;
+            }
+
+            // if(keyDONE == 1){
+            //     for(int i=0; i<details.input[1]; i++){
+            //         for(int j=0; j<details.input[0]; j++){
+            //             if(PRQ[i][j] <= DONE){
+            //                 ;
+            //             }
+            //             else{
+            //                 PRQ[i][nextcQ] = 1; // highest priority to be used
+            //             }
+            //         }
+            //     }
+            //     for(int row=0; row<details.input[1]; row++){
+            //         details.process[0][row][5] = nextcQ;
+            //     }
+            //     keyDONE = 0;
+            // }
+
+            /* -------- DO THIS NEXT
+                When PB = 1, put all PRQ[X][X] into highest priority and reset remaining PRQ to 0
+            */
+            
+           // look for highest queue priority
+           if(keyPB == 1){
+            //    for(int try=0; try<details.input[0]; try++){
+            //         printf("\n bPRQ: %d", PRQ[lcAT][try]);
+            //     }
+                for(int k=0; k<details.input[1]; k++){
+                    for(int l=0; l<details.input[0]; l++){
+                            PRQ[k][l] = 0; // other queues marked to 0
+                            PRQ[k][ilQP] = 1; // highest priority to be used
+                    }
+                }
+                for(int row=0; row<details.input[1]; row++){
+                    details.process[0][row][5] = ilQP;
+                }
+                keyPB = 0;
+                // for(int try=0; try<details.input[0]; try++){
+                //     printf("\n aPRQ: %d", PRQ[lcAT][try]);
+                // }
+           }}
+
+            // // look for next queue
+            // int keyQ = 0;
+            // QP = details.queue[cQ][1];
+            // // get lowest queue priority
+            // for(int k=0; k<details.input[0]; k++){
+            //     int temp = details.queue[k][1];
+            //     if(temp > QP && temp > DONE){
+            //         QP = details.queue[k][1];
+            //         lQP = details.queue[k][0];
+            //         // ilQP = k;
+            //         printf("\nQP is :%d", QP);
+            //     }
+            //     // if same priority, go RR
+            //     else if(temp == details.queue[cQ][1] && details.queue[k][0] != details.queue[cQ][0]){
+            //         keyQ = 1;
+            //         details.process[0][lcAT][5] = k;
+            //     }
+            // }
+            // if(keyQ == 0){
+            //     // get next highest queue priority but lower than last queue
+            //     for(int k=0; k<details.input[0]; k++){
+            //         int temp = details.queue[k][1];
+            //         if(temp < QP && temp > DONE && temp > details.queue[cQ][1]){
+            //             QP = details.queue[k][1];
+            //             lQP = details.queue[k][0];
+            //             details.process[0][lcAT][5] = k;
+            //             printf("\nchanged cQ: %d", details.process[0][lcAT][5]);
+            //         }
+            //         else if(temp == QP){
+                        
+            //         }
+            //     }
+            // }
         }
         // print preemp not done but remaining burst time is <= queue QT
         else if(flag[lcAT][0] == 1 && details.process[0][lcAT][2] <= details.queue[cQ][2] && flag[lcAT][1] > DONE){
