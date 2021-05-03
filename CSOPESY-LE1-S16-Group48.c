@@ -263,7 +263,7 @@ void MLFQ(Feature details){
                 int holder = lcAT;
                 // look for the process in the same queue
                 for(int j=0; j<details.input[1]; j++){
-                    if(PRQ[j][cQ] == 1 && j != lcAT && flag[j][1] > flag[holder][1]){
+                    if(PRQ[j][cQ] == 1 && j != lcAT && flag[j][1] > flag[holder][1] && flag[j][1] > DONE){
                         holder = j;
                     }
                 }
@@ -274,7 +274,7 @@ void MLFQ(Feature details){
                     flag[lcAT][1] = flag[holder][1] + 1; // tama na to
                     // move remaining arrival time +1
                     for(int j=0; j<details.input[1]; j++){
-                        if(j != lcAT && j != holder){
+                        if(j != lcAT && j != holder && flag[j][1] > DONE){
                             flag[j][1]++;
                         }
                     }
@@ -523,7 +523,7 @@ void MLFQ(Feature details){
                     }
                 }
             }
-            else{
+            else if( (details.process[0][lcAT][2] - details.process[0][lcAT][3]) > 0){
                 for(int v=0; v<details.process[0][lcAT][3]; v++){
                     cCPUT++;
                     if(cCPUT % PB == 0){
@@ -558,6 +558,30 @@ void MLFQ(Feature details){
             TT = ET - flag[lcAT][1];
             WT = TT - details.process[0][lcAT][2];
             key = 1;
+            if(details.process[0][lcAT][2] > 0){
+                key = 0;
+                nProcess++;
+
+                int holder = lcAT;
+                // look for the process in the same queue
+                for(int j=0; j<details.input[1]; j++){
+                    if(j != lcAT && flag[j][1] > flag[holder][1]){
+                        holder = j;
+                    }
+                }
+
+                // kung may kasunod, gawin mo to tapos process mo
+                if(holder != lcAT){
+                    // change arrival time in the same queue
+                    flag[lcAT][1] = flag[holder][1] + 1; // tama na to
+                    // move remaining arrival time +1
+                    for(int j=0; j<details.input[1]; j++){
+                        if(j != lcAT && j != holder && flag[j][1] > DONE){
+                            flag[j][1]++;
+                        }
+                    }
+                }
+            }
             // look for highest queue priority
             if(keyPB == 1){
                     for(int k=0; k<details.input[1]; k++){
