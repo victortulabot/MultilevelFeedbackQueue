@@ -88,7 +88,7 @@ void MLFQ(Feature details){
         cCPUT = 0; // CPU Time
     float AWT = 0.0; // Average Waiting Time
 
-    int flag[nProcess][2];
+    int flag[nProcess][3];
     int PRQ[details.input[1]][details.input[0]];
 
     int counter = 0;
@@ -96,6 +96,7 @@ void MLFQ(Feature details){
     for(int i=0; i<nProcess; i++){
         flag[i][0] = 0; // preemp flag
         flag[i][1] = details.process[0][i][1]; // arrival time
+        flag[i][2] = details.process[0][i][2]; // original burst time
     }
     
     int QP = details.queue[0][1];
@@ -259,7 +260,7 @@ void MLFQ(Feature details){
                 details.process[0][lcAT][2] = details.process[0][lcAT][2] - details.process[0][lcAT][3];
                 details.process[0][lcAT][6] = details.process[0][lcAT][6] + details.process[0][lcAT][3];
 
-                // dito mo icheck kung may kasunod pa or wala
+                // check if there is another process
                 int holder = lcAT;
                 // look for the process in the same queue
                 for(int j=0; j<details.input[1]; j++){
@@ -268,7 +269,7 @@ void MLFQ(Feature details){
                     }
                 }
 
-                // kung may kasunod, gawin mo to tapos process mo
+                // if there is another process, do this
                 if(holder != lcAT){
                     // change arrival time in the same queue
                     flag[lcAT][1] = flag[holder][1] + 1; // tama na to
@@ -280,7 +281,7 @@ void MLFQ(Feature details){
                     }
                 }
                 
-                // kung walang kasunod, gawin mo to
+                // if there is no other process, do this
                 else if(holder == lcAT){
                     // look for next arrival time at same prio queue
                     // check arrival time
@@ -329,13 +330,13 @@ void MLFQ(Feature details){
                     int temp3 = templcAT;
                     // look for next arrival time and check if within process time
                     // get highest arrival timee
-                    for(int j=0; j<nProcess; j++){
+                    for(int j=0; j<details.input[1]; j++){
                         if(flag[j][1] > flag[temp3][1]){ // changing arrival time of the current process
                             temp3 = j;
                         }
                     }
                     // get lowest arrival time but higher than current
-                    for(int j=0; j<nProcess; j++){
+                    for(int j=0; j<details.input[1]; j++){
                         if(flag[j][1] < flag[temp3][1] && flag[j][1] > tempncAT && flag[j][1] > DONE){ // check this must be > DONE
                             temp3 = j;
                         }
@@ -347,7 +348,7 @@ void MLFQ(Feature details){
                     }
                     else{
                         // look for highest arrival time
-                        for(int j=0; j<nProcess; j++){
+                        for(int j=0; j<details.input[1]; j++){
                             if(flag[j][1] >= flag[temp3][1] && flag[j][1] <= ET){ // check ET
                                 temp3 = j;
                             }
@@ -369,13 +370,13 @@ void MLFQ(Feature details){
             int ncAT = details.process[0][lcAT][1]; // original arrival time of the current process
             // look for next arrival time and check if within process time
             // get highest arrival timee
-            for(int j=0; j<nProcess; j++){
+            for(int j=0; j<details.input[1]; j++){
                 if(flag[j][1] > flag[temp2][1]){ // changing arrival time of the current process
                     temp2 = j;
                 }
             }
             // get lowest arrival time but higher than current
-            for(int j=0; j<nProcess; j++){
+            for(int j=0; j<details.input[1]; j++){
                 if(flag[j][1] < flag[temp2][1] && flag[j][1] > ncAT && flag[j][1] > DONE){ // check this must be > DONE
                     temp2 = j;
                 }
@@ -387,7 +388,7 @@ void MLFQ(Feature details){
             }
             else{
                 // look for highest arrival time
-                for(int j=0; j<nProcess; j++){
+                for(int j=0; j<details.input[1]; j++){
                     if(flag[j][1] >= flag[temp2][1] && flag[j][1] <= ET){
                         temp2 = j;
                     }
@@ -403,20 +404,7 @@ void MLFQ(Feature details){
                 flag[lcAT][1] = flag[temp2][1] + 1;
                 PRQ[lcAT][cQ] = DONE;
                 details.process[0][lcAT][6] = 0;
-            //}
 
-            /*
-                MAYBE CHANGE INTO THIS ONE?
-                have array PRQ[input[1]][input[0]] and initialize to 0 where
-                [X][0] = q0
-                [X][1] = q1
-                if marked 1, use
-                loop into all input[0] and look for same and use it and break afterwards mark it DONE(-1)
-                if not same, loop into all but iterating priority by 1 until it gets a match and use it and break afterwards mark it DONE
-                if priority boost happens, mark everything to 0 and use very first highest priority queue
-                current CPU time (cCPUT) has a loop to iterate by 1 for every burst time and check for priority boost
-                priority boost happens when ( cCPUT % PT == 0)
-            */
                 // int keyQ = 0;
                 QP = details.queue[cQ][1];
                 int nextcQ = ilQP+1;
@@ -451,23 +439,6 @@ void MLFQ(Feature details){
                     }
                     // temp1++;
                 }
-
-                // if(keyDONE == 1){
-                //     for(int i=0; i<details.input[1]; i++){
-                //         for(int j=0; j<details.input[0]; j++){
-                //             if(PRQ[i][j] <= DONE){
-                //                 ;
-                //             }
-                //             else{
-                //                 PRQ[i][nextcQ] = 1; // highest priority to be used
-                //             }
-                //         }
-                //     }
-                //     for(int row=0; row<details.input[1]; row++){
-                //         details.process[0][row][5] = nextcQ;
-                //     }
-                //     keyDONE = 0;
-                // }
 
                 /* -------- DO THIS NEXT
                     When PB = 1, put all PRQ[X][X] into highest priority and reset remaining PRQ to 0
@@ -542,7 +513,7 @@ void MLFQ(Feature details){
             details.process[1][i][0] = details.process[0][lcAT][0]; // for printing pID
             details.process[1][i][1] = details.queue[cQ][0]; // for printing qID
             details.process[1][i][2] = ST; // for printing start time
-            details.process[1][i][3] = ET; // for printing end time                                              // dito yung 18
+            details.process[1][i][3] = ET; // for printing end time                                              
             if(keyIO == 0){
                 details.process[0][lcAT][2] = details.process[0][lcAT][2] - details.process[0][lcAT][2];
             }
@@ -550,11 +521,6 @@ void MLFQ(Feature details){
                 details.process[0][lcAT][2] = details.process[0][lcAT][2] - details.process[0][lcAT][3];
             }
 
-            // if(details.process[0][lcAT][3] > 0){
-            //     ST = ET + 1;
-            //     ET = ST + details.process[0][lcAT][3];
-            //     printf("\nIO Start time: %d End time: %d", ST, ET);
-            // }
             TT = ET - flag[lcAT][1];
             WT = TT - details.process[0][lcAT][2];
             key = 1;
@@ -570,7 +536,7 @@ void MLFQ(Feature details){
                     }
                 }
 
-                // kung may kasunod, gawin mo to tapos process mo
+                // if there is another process, do it
                 if(holder != lcAT){
                     // change arrival time in the same queue
                     flag[lcAT][1] = flag[holder][1] + 1; // tama na to
@@ -595,7 +561,6 @@ void MLFQ(Feature details){
                     }
                     keyPB = 0;
             }
-            // AWT = AWT + WT;
         }
         // print preemp done
         if(flag[lcAT][0] == 1 && key == 1){
@@ -612,6 +577,9 @@ void MLFQ(Feature details){
                     printf("\nQ[%d] Start time: %d End time: %d", details.process[1][k][1], details.process[1][k][2], details.process[1][k][3 ]);
                 }
             }
+            // printf("\nET %d", ET);
+            // TT = ET - details.process[0][lcAT][1];
+            // WT = TT - flag[lcAT][2];
             TT = ET - flag[lcAT][1];
             WT = TT - details.process[0][lcAT][2];
             printf("\nWaiting time: %d", WT);
