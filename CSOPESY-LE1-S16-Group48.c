@@ -309,6 +309,13 @@ void MLFQ(Feature details){
                     }
 
                     // execute process = IO burst
+                    // iterate CPU time as you process
+                    for(int v=0; v<details.process[0][lcAT][3]; v++){
+                        cCPUT++;
+                        if(cCPUT % PB == 0){
+                            keyPB = 1;
+                        }
+                    }
                     nProcess++;
                     i++;
                     details.process[1][i][0] = details.process[0][templcAT][0]; // for printing pID
@@ -316,8 +323,7 @@ void MLFQ(Feature details){
                     details.process[1][i][2] = tempST; // for printing start time
                     details.process[1][i][3] = tempET; // for printing end time
                     details.process[0][templcAT][2] = details.process[0][templcAT][2] - details.process[0][lcAT][3];
-                    // printf("\n\n the IO process during process %d is pID[%d] Q[%d] ST %d ET %d",details.process[0][lcAT][0],details.process[0][templcAT][0],details.queue[tempcQ][0],tempST,tempET);
-
+                    
                     // change arrival time of executed process to the last of same prio queue
                     int tempncAT = details.process[0][templcAT][1]; // original arrival time of the current process
                     int temp3 = templcAT;
@@ -536,8 +542,7 @@ void MLFQ(Feature details){
             details.process[1][i][0] = details.process[0][lcAT][0]; // for printing pID
             details.process[1][i][1] = details.queue[cQ][0]; // for printing qID
             details.process[1][i][2] = ST; // for printing start time
-            details.process[1][i][3] = ET; // for printing end time                                                    
-
+            details.process[1][i][3] = ET; // for printing end time                                              // dito yung 18
             if(keyIO == 0){
                 details.process[0][lcAT][2] = details.process[0][lcAT][2] - details.process[0][lcAT][2];
             }
@@ -553,6 +558,19 @@ void MLFQ(Feature details){
             TT = ET - flag[lcAT][1];
             WT = TT - details.process[0][lcAT][2];
             key = 1;
+            // look for highest queue priority
+            if(keyPB == 1){
+                    for(int k=0; k<details.input[1]; k++){
+                        for(int l=0; l<details.input[0]; l++){
+                                PRQ[k][l] = 0; // other queues marked to 0
+                                PRQ[k][ilQP] = 1; // highest priority to be used
+                        }
+                    }
+                    for(int row=0; row<details.input[1]; row++){
+                        details.process[0][row][5] = ilQP;
+                    }
+                    keyPB = 0;
+            }
             // AWT = AWT + WT;
         }
         // print preemp done
