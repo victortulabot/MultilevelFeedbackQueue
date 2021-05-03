@@ -394,7 +394,7 @@ void MLFQ(Feature details){
                     }
                 }
             }
-            // change arrival time for queue                                        check
+            // change arrival time for queue                                        
             if (keyIO == 1 && details.process[0][lcAT][6] < details.queue[cQ][2] && details.process[0][lcAT][6] > 0){
                 // counter < queue burst
                 nProcess++;
@@ -437,7 +437,6 @@ void MLFQ(Feature details){
                     else if(PRQ[lcAT][k] == DONE){
                         keyDONE = 1;
                     }
-                    // temp1++;
                 }
 
                 /* -------- DO THIS NEXT
@@ -508,8 +507,18 @@ void MLFQ(Feature details){
                 details.process[2][i][2] = tempST; // for printing start time
                 details.process[2][i][3] = tempET; // for printing end time
             }
+            else{
+                for(int v=0; v<details.process[0][lcAT][3]; v++){
+                    cCPUT++;
+                    if(cCPUT % PB == 0){
+                        keyPB = 1;
+                    }
+                }
+                ET = ET + details.process[0][lcAT][4];
+                tempST = ET;
+                tempET = tempST + details.process[0][lcAT][3];
+            }
 
-            // ET = ET + details.process[0][lcAT][2];
             details.process[1][i][0] = details.process[0][lcAT][0]; // for printing pID
             details.process[1][i][1] = details.queue[cQ][0]; // for printing qID
             details.process[1][i][2] = ST; // for printing start time
@@ -520,7 +529,6 @@ void MLFQ(Feature details){
             else{
                 details.process[0][lcAT][2] = details.process[0][lcAT][2] - details.process[0][lcAT][3];
             }
-
             TT = ET - flag[lcAT][1];
             WT = TT - details.process[0][lcAT][2];
             key = 1;
@@ -570,18 +578,15 @@ void MLFQ(Feature details){
             else{
                 ST = ET;
             }
-            // ET = ST + details.process[0][lcAT][2];
+            ET = ST + details.process[0][lcAT][2];
             printf("\nP[%d]", details.process[0][lcAT][0]);
             for(int k=0; k<100; k++){
                 if(details.process[1][k][3] != 0 && details.process[1][k][0] == details.process[0][lcAT][0]){
                     printf("\nQ[%d] Start time: %d End time: %d", details.process[1][k][1], details.process[1][k][2], details.process[1][k][3 ]);
                 }
             }
-            // printf("\nET %d", ET);
-            // TT = ET - details.process[0][lcAT][1];
-            // WT = TT - flag[lcAT][2];
-            TT = ET - flag[lcAT][1];
-            WT = TT - details.process[0][lcAT][2];
+            TT = ET - details.process[0][lcAT][1];
+            WT = TT - flag[lcAT][2];
             printf("\nWaiting time: %d", WT);
             printf("\nTurnaround time: %d", TT);
             printf("\n************************************");
